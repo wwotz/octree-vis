@@ -27,12 +27,14 @@ aabbs_init(void)
 		// left face
 		0, 4, 7,
 		7, 3, 0,
+		//
 		
 		// right face
 		1, 5, 6,
 		6, 2, 1,
 		
 		// back face
+		
 		5, 4, 7,
 		7, 6, 5,
 		

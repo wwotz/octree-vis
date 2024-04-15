@@ -3,11 +3,25 @@
 
 #include "linear.h"
 #include "ray.h"
+#include <GL/glew.h>
+
+typedef enum aabb_buffer_t {
+	AABB_BUFFER_VAO,
+	AABB_BUFFER_VBO,
+	AABB_BUFFER_EBO,
+	AABB_BUFFER_COUNT
+} aabb_buffer_t;
+
+extern aabb_buffer_t aabb_buffers[AABB_BUFFER_COUNT];
+extern GLuint aabb_shader;
 
 typedef struct aabb_t {
 	vec3_t min;
 	vec3_t max;
 } aabb_t;
+
+extern int
+aabbs_init(void);
 
 extern aabb_t
 aabb_empty(void);

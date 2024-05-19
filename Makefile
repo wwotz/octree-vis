@@ -12,7 +12,7 @@ all: $(EXEC)
 	@echo "CC $<"
 
 $(EXEC) : $(OBJ)
-	@mkdir bin
+	@mkdir -p bin
 	@$(CC) -o $@ $^ $(CLIBS) $(CFLAGS)
 	@echo "Finished compiling the visualisation."
 clean:

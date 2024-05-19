@@ -31,9 +31,8 @@ octree_contains(octree_t *octree, aabb_t aabb)
 	return aabb_contains(octree->aabb, aabb);
 }
 
-// it's possible that something is so small that it can overflow the stack, so we
-// limit how deep the octree can become so octree_insert_internal only goes to deep
-#define OCTREE_MAXIMUM_DEPTH (5)
+// change as you please, but be careful since it can crash the program if too deep
+#define OCTREE_MAXIMUM_DEPTH (10)
 
 static int
 octree_insert_internal(octree_t *octree, aabb_t aabb, int level)
@@ -163,7 +162,7 @@ octree_render_internal(octree_t *octree)
 			   1, GL_FALSE, ll_matrix_get_copy().data);
 	glUniform4f(glGetUniformLocation(aabb_shader, "colour"),
 		    1.0, 1.0, 1.0, 1.0);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_LINES, 36, GL_UNSIGNED_INT, NULL);
 		
 	for (i = 0; i < octree->size; i++) {
 		aabb_t aabb = octree->objects[i];
@@ -177,7 +176,7 @@ octree_render_internal(octree_t *octree)
 			   1, GL_FALSE, ll_matrix_get_copy().data);
 		glUniform4f(glGetUniformLocation(aabb_shader, "colour"),
 		    1.0, 1.0, 1.0, 1.0);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
+		glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, NULL);
 	}
 
 	for (i = 0; i < OCTREE_CHILDREN; i++) {

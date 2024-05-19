@@ -20,6 +20,19 @@ static octree_t *octree;
 #define OCTREE_LIMIT (1000)
 size_t octree_limit;
 
+static void
+octree_random_insert(void)
+{
+	float a, b, c, d, e, f;
+	a = ((random() / (float) RAND_MAX) * 450.0);
+	b = ((random() / (float) RAND_MAX) * 450.0);
+	c = ((random() / (float) RAND_MAX) * 450.0);
+	d = a + ((random() / (float) RAND_MAX) * 30.0) + 10.0;
+	e = b + ((random() / (float) RAND_MAX) * 30.0) + 10.0;
+	f = c + ((random() / (float) RAND_MAX) * 30.0) + 10.0;
+	octree_insert(octree, (aabb_t) { {{a,b,c}}, {{d,e,f}}});
+}
+
 int
 main(int argc, char **argv)
 {
@@ -66,14 +79,7 @@ main(int argc, char **argv)
 				running = 0;
 			} else if (event.type == SDL_KEYDOWN) {
 				if (octree_limit < OCTREE_LIMIT) {
-					float a, b, c, d, e, f;
-					a = ((random() / (float) RAND_MAX) * 450.0);
-					b = ((random() / (float) RAND_MAX) * 450.0);
-					c = ((random() / (float) RAND_MAX) * 450.0);
-					d = a + ((random() / (float) RAND_MAX) * 30.0) + 10.0;
-					e = b + ((random() / (float) RAND_MAX) * 30.0) + 10.0;
-					f = c + ((random() / (float) RAND_MAX) * 30.0) + 10.0;
-					octree_insert(octree, (aabb_t) { {{a,b,c}}, {{d,e,f}}});
+					octree_random_insert();
 				}
 			}
 		}

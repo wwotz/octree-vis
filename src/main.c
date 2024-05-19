@@ -1,15 +1,14 @@
+#include "../include/settings.h"
 #include "../include/linear.h"
 #include "../include/font.h"
 #include "../include/aabb.h"
 #include "../include/octree.h"
+#include "../include/camera.h"
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 #include <time.h>
-
-#define WINDOW_WIDTH  (800)
-#define WINDOW_HEIGHT (800)
 
 static SDL_Window *window;
 static SDL_GLContext *context;
@@ -17,7 +16,6 @@ static SDL_Event event;
 static int running;
 static octree_t *octree;
 
-#define OCTREE_LIMIT (1000)
 size_t octree_limit;
 
 static void
@@ -33,9 +31,25 @@ octree_random_insert(void)
 	octree_insert(octree, (aabb_t) { {{a,b,c}}, {{d,e,f}}});
 }
 
+enum button_pressed_t {
+	BUTTON_PRESSED_W,
+	BUTTON_PRESSED_A,
+	BUTTON_PRESSED_S,
+	BUTTON_PRESSED_D,
+	BUTTON_PRESSED_Z,
+	BUTTON_PRESSED_X,
+	BUTTON_PRESSED_COUNT
+};
+
 int
 main(int argc, char **argv)
 {
+	int i;
+	int buttons[BUTTON_PRESSED_COUNT];
+	for (i = 0; i < BUTTON_PRESSED_COUNT; i++)
+		buttons[i] = 0;
+	vec3_t from = ll_vec3_create3f(700.0, 300.0, -400.0),
+		to = ll_vec3_create3f(250.0, 250.0, 250.0);
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
@@ -53,20 +67,7 @@ main(int argc, char **argv)
 			{{ 500.0, 500.0, 500.0 }}
 		});
 
-	vec3_t from = ll_vec3_create3f(700.0, 300.0, -400.0),
-		to = ll_vec3_create3f(250.0, 250.0, 250.0);
-	vec3_t temp = ll_vec3_create3f(0.0, 1.0, 0.0);
-	vec3_t forward = ll_vec3_normalise3fv(ll_vec3_sub3fv(from, to));
-	vec3_t right = ll_vec3_cross3fv(temp, forward);
-	vec3_t up = ll_vec3_cross3fv(forward, right);
-
-	ll_matrix_mode(LL_MATRIX_PROJECTION);
-	ll_matrix_perspective(90.0, WINDOW_WIDTH / WINDOW_HEIGHT,
-			      10.0, 10000.0);
-	glViewport(0.0, 0.0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	ll_matrix_mode(LL_MATRIX_VIEW);
-	ll_matrix_lookat(right, up, forward, from);
-
+	camera_setup(from,to);
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -78,11 +79,62 @@ main(int argc, char **argv)
 			if (event.type == SDL_QUIT) {
 				running = 0;
 			} else if (event.type == SDL_KEYDOWN) {
-				if (octree_limit < OCTREE_LIMIT) {
-					octree_random_insert();
+				switch (event.key.keysym.sym) {
+				case SDLK_w:
+					buttons[BUTTON_PRESSED_W] = 1;
+					break;
+				case SDLK_a:
+					buttons[BUTTON_PRESSED_A] = 1;
+					break;
+				case SDLK_s:
+					buttons[BUTTON_PRESSED_S] = 1;
+					break;
+				case SDLK_d:
+					buttons[BUTTON_PRESSED_D] = 1;
+					break;
+				case SDLK_z:
+					buttons[BUTTON_PRESSED_Z] = 1;
+					break;
+				case SDLK_x:
+					buttons[BUTTON_PRESSED_X] = 1;
+					break;
+				case SDLK_TAB:
+					if (octree_limit < OCTREE_LIMIT) {
+						octree_random_insert();
+					}
+					break;
+				}
+			} else if (event.type == SDL_KEYUP) {
+				switch (event.key.keysym.sym) {
+				case SDLK_w:
+					buttons[BUTTON_PRESSED_W] = 0;
+					break;
+				case SDLK_a:
+					buttons[BUTTON_PRESSED_A] = 0;
+					break;
+				case SDLK_s:
+					buttons[BUTTON_PRESSED_S] = 0;
+					break;
+				case SDLK_d:
+					buttons[BUTTON_PRESSED_D] = 0;
+					break;
+				case SDLK_z:
+					buttons[BUTTON_PRESSED_Z] = 0;
+					break;
+				case SDLK_x:
+					buttons[BUTTON_PRESSED_X] = 0;
+					break;
 				}
 			}
 		}
+
+		if (buttons[BUTTON_PRESSED_W]) camera_move_up();
+		if (buttons[BUTTON_PRESSED_A]) camera_move_left();
+		if (buttons[BUTTON_PRESSED_S]) camera_move_down();
+		if (buttons[BUTTON_PRESSED_D]) camera_move_right();
+		if (buttons[BUTTON_PRESSED_Z]) camera_move_forward();
+		if (buttons[BUTTON_PRESSED_X]) camera_move_backward();
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		octree_render(octree);
 		SDL_GL_SwapWindow(window);
